@@ -1,7 +1,13 @@
 # github.com/BurntSushi/toml v0.4.1
 ## explicit
 github.com/BurntSushi/toml
-github.com/BurntSushi/toml/cmd/tomlv
 github.com/BurntSushi/toml/internal
-# github.com/go-co-op/gocron v1.6.2
+# github.com/PuerkitoBio/goquery v1.7.1
 ## explicit
+github.com/PuerkitoBio/goquery
+# github.com/andybalholm/cascadia v1.2.0
+github.com/andybalholm/cascadia
+# golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+## explicit
+golang.org/x/net/html
+golang.org/x/net/html/atom

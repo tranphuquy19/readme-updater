@@ -5,10 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"text/template"
+
+	"github.com/BurntSushi/toml"
+	"github.com/PuerkitoBio/goquery"
 )
 
 type GithubCredential struct {
@@ -73,9 +77,9 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 		panic(err)
 	}
 	req.Header = http.Header{
-		"Accept": []string{"application/vnd.github.v3+json"},
+		"Accept":        []string{"application/vnd.github.v3+json"},
 		"Authorization": []string{"token " + githubCredential.Token},
-		"Content-Type": []string{"application/json"},
+		"Content-Type":  []string{"application/json"},
 	}
 
 	res, err := client.Do(req)
@@ -88,6 +92,9 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 			panic(err)
 		}
 	}(res.Body)
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -103,13 +110,55 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 	return blobObj
 }
 
+func getWeather() string {
+	var weatherStr = ""
+	res, err := http.Get("https://wttr.in/Danang?format=v2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	doc.Find("pre").Each(func(i int, s *goquery.Selection) {
+		result := s.Text()
+		weatherStr = "<pre>" + result + "</pre>"
+		fmt.Printf("Review %d: %s\n", i, result)
+	})
+	return weatherStr
+}
+
 func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	readmeTmplStr, err := ioutil.ReadFile("README.md.tmpl")
 	if err != nil {
 		panic(err)
 	}
 
-	contentBase64Str := base64.StdEncoding.EncodeToString(readmeTmplStr)
+	tmpl, err := template.New("readme").Parse(string(readmeTmplStr))
+	if err != nil {
+		panic(err)
+	}
+
+	data := struct {
+		Weather string
+	}{
+		Weather: getWeather(),
+	}
+
+	var tpl bytes.Buffer
+	if err = tmpl.Execute(&tpl, data); err != nil {
+		panic(err)
+	}
+
+	readmeExecuted := tpl.String()
+
+	contentBase64Str := base64.StdEncoding.EncodeToString([]byte(readmeExecuted))
 
 	reqBodyObj := ReqUpdateReadmeBody{
 		Message: githubCredential.DefaultMessage,
@@ -117,11 +166,11 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 		Sha:     blobObj.Sha,
 		Committer: Committer{
 			Email: githubCredential.Email,
-			Name: githubCredential.Name,
+			Name:  githubCredential.Name,
 		},
 		Author: Author{
 			Email: githubCredential.Email,
-			Name: githubCredential.Name,
+			Name:  githubCredential.Name,
 		},
 	}
 
@@ -141,9 +190,9 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	}
 
 	req.Header = http.Header{
-		"Accept": []string{"application/vnd.github.v3+json"},
+		"Accept":        []string{"application/vnd.github.v3+json"},
 		"Authorization": []string{"token " + githubCredential.Token},
-		"Content-Type": []string{"application/json"},
+		"Content-Type":  []string{"application/json"},
 	}
 
 	res, err := client.Do(req)
@@ -156,6 +205,9 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 			panic(err)
 		}
 	}(res.Body)
+	if res.StatusCode != 200 {
+		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+	}
 
 	resJson, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -163,6 +215,7 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	}
 
 	fmt.Println(string(resJson))
+	getWeather()
 }
 
 func main() {
