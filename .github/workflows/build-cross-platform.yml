@@ -30,3 +30,31 @@ jobs:
 
       - name: Build
         run: bash ./build.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: readme-updater
+          path: build
+
+  # publish:
+  #   name: Publish for ${{ matrix.os }} - ${{ matrix.arch }}
+  #   runs-on: ubuntu-latest
+  #   uses: svenstaro/upload-release-action@v2
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - os: linux
+  #           arch: amd64
+  #         - os: linux
+  #           arch: arm
+
+  #         - os: windows
+  #           arch: amd64
+  #         - os: windows
+  #           arch: arm
+
+  #         - os: darwin
+  #           arch: amd64
+  #         - os: darwin
+  #           arch: arm
+    

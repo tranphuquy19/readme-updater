@@ -147,7 +147,6 @@ func getWeather() string {
 	doc.Find("pre").Each(func(i int, s *goquery.Selection) {
 		result := s.Text()
 		weatherStr = "<pre>" + result + "</pre>"
-		fmt.Printf("Review %d: %s\n", i, result)
 	})
 	return weatherStr
 }
@@ -196,8 +195,6 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 		panic(err)
 	}
 
-	fmt.Println(string(reqBodyJson))
-
 	client := http.Client{}
 
 	reqUrl := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", githubCredential.Username, githubCredential.Repo, githubCredential.FilePath)
@@ -226,12 +223,6 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
-	resJson, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(string(resJson))
 	getWeather()
 }
 
@@ -244,5 +235,6 @@ func main() {
 	var scheduler = gocron.NewScheduler(time.UTC)
 	githubCredential := getCredentials()
 	scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
+	fmt.Println("Service is running...")
 	scheduler.StartBlocking()
 }
