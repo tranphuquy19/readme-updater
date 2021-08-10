@@ -229,6 +229,7 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 func Run(githubCredential GithubCredential) {
 	blobObj := getBlobContent(githubCredential)
 	updateNewReadme(githubCredential, blobObj)
+	fmt.Println("Updated at: ", time.Now().Format("01-02-2006 15:04:05"))
 }
 
 func main() {
