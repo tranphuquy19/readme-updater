@@ -145,6 +145,7 @@ func getWeather() string {
 
 	doc.Find("pre").Each(func(i int, s *goquery.Selection) {
 		result := s.Text()
+		fmt.Println(result)
 		weatherStr = "<pre>" + result + "</pre>"
 	})
 	return weatherStr
@@ -222,8 +223,6 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
-
-	getWeather()
 }
 
 func Run(githubCredential GithubCredential) {
@@ -237,5 +236,10 @@ func main() {
 	githubCredential := getCredentials()
 	scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
 	fmt.Println("Service is running...")
-	scheduler.StartBlocking()
+	scheduler.StartAsync()
+	if true {
+		for {
+			select {}
+		}
+	}
 }
