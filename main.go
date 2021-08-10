@@ -68,7 +68,7 @@ type Author struct {
 func getCredentials() GithubCredential {
 	var githubCredential GithubCredential
 	if _, err := toml.DecodeFile(".credentials", &githubCredential); err != nil {
-		panic(err)
+		log.Fatalf("getCredentials %s", err.Error())
 	}
 	return githubCredential
 }
@@ -78,7 +78,7 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 	reqUrl := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", githubCredential.Username, githubCredential.Repo, githubCredential.FilePath)
 	req, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
-		panic(err)
+		log.Fatalf("getBlobContent %s", err.Error())
 	}
 	req.Header = http.Header{
 		"Accept":        []string{"application/vnd.github.v3+json"},
@@ -88,27 +88,25 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("getBlobContent %s", err.Error())
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			panic(err)
+			log.Fatalf("getBlobContent %s", err.Error())
 		}
 	}(res.Body)
+
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		panic(err)
-	}
-
 	var blobObj BlobContent
-	err = json.Unmarshal(body, &blobObj)
+	err = json.NewDecoder(res.Body).Decode(&blobObj)
 	if err != nil {
-		panic(err)
+		bd, _ := ioutil.ReadAll(res.Body)
+		fmt.Println(string(bd))
+		log.Fatalf("getBlobContent %s", err.Error())
 	}
 
 	return blobObj
@@ -119,7 +117,7 @@ func getWeather() string {
 	client := http.Client{}
 	req, err := http.NewRequest("GET", "https://wttr.in/Danang?format=v2", nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("getWeather %s", err.Error())
 	}
 	req.Header = http.Header{
 		"User-Agent": []string{browser.Random()},
@@ -127,21 +125,22 @@ func getWeather() string {
 
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("getWeather %s", err.Error())
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			panic(err)
+			log.Fatalf("getWeather %s", err.Error())
 		}
 	}(res.Body)
+
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("getWeather %s", err.Error())
 	}
 
 	doc.Find("pre").Each(func(i int, s *goquery.Selection) {
@@ -154,12 +153,12 @@ func getWeather() string {
 func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	readmeTmplStr, err := ioutil.ReadFile("README.md.tmpl")
 	if err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 
 	tmpl, err := template.New("readme").Parse(string(readmeTmplStr))
 	if err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 
 	data := struct {
@@ -170,7 +169,7 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 
 	var tpl bytes.Buffer
 	if err = tmpl.Execute(&tpl, data); err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 
 	readmeExecuted := tpl.String()
@@ -192,7 +191,7 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 
 	reqBodyJson, err := json.Marshal(reqBodyObj)
 	if err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 
 	client := http.Client{}
@@ -200,7 +199,7 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	reqUrl := fmt.Sprintf("https://api.github.com/repos/%s/%s/contents/%s", githubCredential.Username, githubCredential.Repo, githubCredential.FilePath)
 	req, err := http.NewRequest("PUT", reqUrl, bytes.NewBuffer(reqBodyJson))
 	if err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 
 	req.Header = http.Header{
@@ -211,14 +210,15 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		log.Fatalf("updateNewReadme %s", err.Error())
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			panic(err)
+			log.Fatalf("updateNewReadme %s", err.Error())
 		}
 	}(res.Body)
+
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}
