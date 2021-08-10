@@ -10,9 +10,11 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-co-op/gocron"
 )
 
 type GithubCredential struct {
@@ -157,7 +159,6 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	}
 
 	readmeExecuted := tpl.String()
-
 	contentBase64Str := base64.StdEncoding.EncodeToString([]byte(readmeExecuted))
 
 	reqBodyObj := ReqUpdateReadmeBody{
@@ -218,8 +219,14 @@ func updateNewReadme(githubCredential GithubCredential, blobObj BlobContent) {
 	getWeather()
 }
 
-func main() {
-	githubCredential := getCredentials()
+func Run(githubCredential GithubCredential) {
 	blobObj := getBlobContent(githubCredential)
 	updateNewReadme(githubCredential, blobObj)
+}
+
+func main() {
+	var scheduler = gocron.NewScheduler(time.UTC)
+	githubCredential := getCredentials()
+	scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
+	scheduler.StartBlocking()
 }

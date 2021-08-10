@@ -7,7 +7,15 @@ github.com/BurntSushi/toml/internal
 github.com/PuerkitoBio/goquery
 # github.com/andybalholm/cascadia v1.2.0
 github.com/andybalholm/cascadia
+# github.com/go-co-op/gocron v1.6.2
+## explicit
+github.com/go-co-op/gocron
+# github.com/robfig/cron/v3 v3.0.1
+github.com/robfig/cron/v3
 # golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
 ## explicit
 golang.org/x/net/html
 golang.org/x/net/html/atom
+# golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+golang.org/x/sync/semaphore
+golang.org/x/sync/singleflight
