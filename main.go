@@ -13,7 +13,9 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/PuerkitoBio/goquery"
+	_ "github.com/PuerkitoBio/goquery"
 	"github.com/go-co-op/gocron"
 )
 
@@ -114,11 +116,25 @@ func getBlobContent(githubCredential GithubCredential) BlobContent {
 
 func getWeather() string {
 	var weatherStr = ""
-	res, err := http.Get("https://wttr.in/Danang?format=v2")
+	client := http.Client{}
+	req, err := http.NewRequest("GET", "https://wttr.in/Danang?format=v2", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer res.Body.Close()
+	req.Header = http.Header{
+		"User-Agent": []string{browser.Random()},
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(res.Body)
 	if res.StatusCode != 200 {
 		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
 	}

@@ -2,6 +2,15 @@
 ## explicit
 github.com/BurntSushi/toml
 github.com/BurntSushi/toml/internal
+# github.com/EDDYCJY/fake-useragent v0.2.0
+## explicit
+github.com/EDDYCJY/fake-useragent
+github.com/EDDYCJY/fake-useragent/downloader
+github.com/EDDYCJY/fake-useragent/scheduler
+github.com/EDDYCJY/fake-useragent/setting
+github.com/EDDYCJY/fake-useragent/spiders
+github.com/EDDYCJY/fake-useragent/useragent
+github.com/EDDYCJY/fake-useragent/useragent/cache
 # github.com/PuerkitoBio/goquery v1.7.1
 ## explicit
 github.com/PuerkitoBio/goquery
