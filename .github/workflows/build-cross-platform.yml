@@ -1,0 +1,32 @@
+name: Build cross platform
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
+      - dev
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+        platform: [ubuntu-latest]
+    
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Install go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+      - uses: actions/checkout@v2
+
+      - name: List all OS & Architectures supported by Go
+        run: go tool dist list
+
+      - name: Build
+        run: bash ./build.sh
