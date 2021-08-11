@@ -233,10 +233,7 @@ func Run(githubCredential GithubCredential) {
 func main() {
 	var scheduler = gocron.NewScheduler(time.UTC)
 	githubCredential := getCredentials()
-	_, err := scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
-	if err != nil {
-		return
-	}
+	scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
 	fmt.Println("Service is running...")
 	scheduler.StartAsync()
 	if true {
