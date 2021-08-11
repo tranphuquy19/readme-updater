@@ -15,7 +15,6 @@ import (
 	"github.com/BurntSushi/toml"
 	browser "github.com/EDDYCJY/fake-useragent"
 	"github.com/PuerkitoBio/goquery"
-	_ "github.com/PuerkitoBio/goquery"
 	"github.com/go-co-op/gocron"
 )
 
@@ -234,7 +233,10 @@ func Run(githubCredential GithubCredential) {
 func main() {
 	var scheduler = gocron.NewScheduler(time.UTC)
 	githubCredential := getCredentials()
-	scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
+	_, err := scheduler.Cron(githubCredential.CronExpression).Do(func() { Run(githubCredential) })
+	if err != nil {
+		return
+	}
 	fmt.Println("Service is running...")
 	scheduler.StartAsync()
 	if true {
